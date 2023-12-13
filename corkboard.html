@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Corkboard</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: sans-serif;
+        }
+
+        html, body {
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .prevent-select {
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        #corkboard {
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient( rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2) ), url(https://unblast.com/wp-content/uploads/2023/07/corkboard-texture.jpg);
+            background-size: cover;
+        }
+
+        #notespace {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .note {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+        }
+
+        .note .main {
+            width: 100%;
+            display: grid;
+            align-items: center;
+            background-image: url(data:image/png;base64,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);
+            background-color: #EEF;
+            -moz-box-shadow :5px 5px 5px rgba(0, 0, 0, 0.3);
+            -webkit-box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.3);
+            box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.3);
+            padding: 5px;
+        }
+
+        .note .title {
+            text-align: center;
+            font-size: 1.5rem;
+            padding: 0;
+            margin: 0;
+        }
+
+        .note .image {
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 80px;
+            max-height: 80px;
+            filter: grayscale();
+            opacity: 0.9;
+            border: 1px solid #999;
+        }
+
+        .note .caption {
+            text-align: center;
+            font-size: 1rem;
+            padding: 5px 0 0 0;
+            margin: 0;
+        }
+
+        .note .comment-list {
+            list-style: none;
+            padding-left: 0;
+            margin-top: 5px;
+        }
+
+        .note .comment {
+            position:relative;
+            font-size: 1rem;
+            margin-top: 3%;
+            background-image: url(data:image/png;base64,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);
+            background-color: #EEF;
+            -moz-box-shadow:5px 5px 5px rgba(0,0,0,0.3);
+            -webkit-box-shadow:5px 5px 5px rgba(0,0,0,0.3);
+            box-shadow:5px 5px 5px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .top-left-pinned:before {
+            content: "";
+            position: absolute;
+            height: 5px;
+            width: 5px;
+            left: 5px;
+            top: 5px;
+            background-color: red;
+            -moz-box-shadow: 2px 2px 2px rgba(0,0,0,0.3);
+            -webkit-box-shadow: 2px 2px 2px rgba(0,0,0,0.3);
+            box-shadow: 2px 2px 2px rgba(0,0,0,0.3);
+        }
+
+        .top-right-pinned:after {
+            content: "";
+            position: absolute;
+            height: 5px;
+            width: 5px;
+            right: 5px;
+            top: 5px;
+            background-color: red;
+            -moz-box-shadow: 2px 2px 2px rgba(0,0,0,0.3);
+            -webkit-box-shadow: 2px 2px 2px rgba(0,0,0,0.3);
+            box-shadow: 2px 2px 2px rgba(0,0,0,0.3);
+        }
+
+        #strings {
+            width: 100%;
+            height: 100%;
+            z-index: 10;;
+        }
+
+        #create-note {
+            position: absolute;
+            transition: left 0.5s;
+            left: 97vw;
+            bottom: 10px;
+            font-size: 2rem;
+        }
+
+        #editor {
+            position: absolute;
+            top: 0;
+            left: 100vw;
+            height: 100%;
+            width: 35vw;
+            background-color: #EEE;
+            overflow: visible;
+            border-bottom-left-radius: 15px;
+            -moz-box-shadow: -5px 5px 5px rgba(0, 0, 0, 0.3);
+            -webkit-box-shadow: -5px 5px 5px rgba(0, 0, 0, 0.3);
+            box-shadow: -5px 5px 5px rgba(0, 0, 0, 0.3);
+            transition: left 0.5s;
+        }
+
+        #hide-editor {
+            position: absolute;
+            width: 50px;
+            font-size: 1.5rem;
+        }
+
+        #editor {
+            z-index: 100;
+        }
+
+        #editor * {
+            font-size: 1.2rem;
+        }
+
+        #editor h2 {
+            font-size: 2rem;
+            text-align: center;
+            margin: 1%;
+        }
+
+        #editor-controls {
+            display: grid;
+            grid-template-columns: 1fr 5fr;
+            column-gap: 1%;
+            row-gap: 5%;
+            padding: 1%;
+            margin-bottom: 10px;
+        }
+
+        #last-comment-label {
+            display: block;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 3px;
+        }
+
+        #editor-comments {
+            display: grid;
+            padding: 1%;
+            grid-template-columns: 1fr 0fr;
+            column-gap: 1%;
+            row-gap: 5%;
+        }
+
+        #editor-comments button {
+            height: 30px;
+        }
+
+        #mode, #load-from-file-label, #save-to-file {
+            all: unset;
+            background-color: buttonface;
+            display: grid;
+            place-content: center;
+            position: absolute;
+            font-size: 1.5rem;
+            height: 30px;
+            width: 100px;
+            bottom: 5px;
+        }
+
+        #mode {
+            left: 5px;
+        }
+
+        #load-from-file-label {
+            left: 115px;
+        }
+
+        #save-to-file {
+            left: 225px;
+        }
+    </style>
+</head>
+<body>
+    <div id="corkboard">
+        <svg id="strings"></svg>
+        <button type="button" id="create-note" onclick="createNote()">&nbsp;+&nbsp;</button>
+        <div id="editor">
+            <button type="button" id="hide-editor" onclick="hideEditor()">&gt;</button>
+            <h2>Editor</h2>
+            <div id="editor-controls">
+                <label for="editor-title">Title:</label>
+                <input id="editor-title" type="text" placeholder="Title" oninput="editTitle(this.value)">
+                <label for="editor-image">Image URL:</label>
+                <input id="editor-image" type="text" placeholder="Image URL" oninput="editImage(this.value)">
+                <label for="editor-image">Caption:</label>
+                <input id="editor-caption" type="text" placeholder="Caption" oninput="editCaption(this.value)">
+            </div>
+            <h3 id="last-comment-label">Comments</h3>
+            <div id="editor-comments"></div>
+        </div>
+        <button id="mode" type="button" onclick="cycleMode()">Edit</button>
+        <label id="load-from-file-label" for="load-from-file">Load</label>
+        <input id="load-from-file" type="file" hidden="true" onchange="loadFromFile()">
+        <button id="save-to-file" type="button" onclick="saveToFile()">Save</button>
+        <div id="notespace"></div>
+    </div>
+    <a id="file-download-helper" hidden="true"></a>
+</body>
+<script>
+    window.onload = function() {
+        drawAllNotes();
+
+        document.addEventListener("mouseup", function() {
+            document.removeEventListener("mousemove", moveNote, false);
+        }, false);
+    }
+
+    var noteDataStore = {};
+
+    var mousePosition;
+    var selectedNoteIndex;
+
+    var mode = "edit";
+    var firstConnectionId;
+
+    function cycleMode() {
+        firstConnectionId = undefined;
+        switch (mode) {
+            case "edit":
+                mode = "pin";
+                document.getElementById("mode").innerText = "Pin";
+                break;
+            case "pin":
+                mode = "edit";
+                document.getElementById("mode").innerText = "Edit";
+                break;
+        }
+    }
+
+    function drawAllNotes() {
+        document.getElementById("notespace").innerHTML = "";
+        for (noteIndex in noteDataStore) {buildNote(noteIndex);}
+        redrawConnections();
+    }
+
+    function buildNote(noteIndex) {
+        const noteData = noteDataStore[noteIndex];
+        const note = document.getElementById("note-" + noteIndex) != undefined ? document.getElementById("note-" + noteIndex) : document.createElement("div");
+        note.innerHTML = "";
+        note.setAttribute("id", "note-" + noteIndex);
+        note.setAttribute("class", "note prevent-select");
+        note.setAttribute( "onClick", "javascript: noteClick(" + noteIndex + ");");
+        
+        if (noteData.title != undefined || noteData.image != undefined || noteData.caption != undefined) {
+            const main = document.createElement("div");
+            main.setAttribute("class", "main top-left-pinned top-right-pinned");
+
+            if (noteData.title != undefined) {
+                const title = document.createElement("h2");
+                title.setAttribute("class", "title");
+                title.innerHTML = noteData.title;
+                main.appendChild(title);
+            }
+
+            if (noteData.image != undefined) {
+                const image = document.createElement("img");
+                image.setAttribute("class", "image");
+                image.setAttribute("src", noteData.image);
+                image.setAttribute("draggable", false);
+                main.appendChild(image);
+            }
+
+            if (noteData.caption != undefined) {
+                const caption = document.createElement("p");
+                caption.setAttribute("class", "caption");
+                caption.innerHTML = noteData.caption;
+                main.appendChild(caption);
+            }
+
+            note.appendChild(main);
+        }
+
+        if (noteData.comments != undefined) {
+            const commentList = document.createElement("ul");
+            commentList.setAttribute("class", "comment-list");
+            for (let i=0; i<noteData.comments.length; i++) {
+                const comment = document.createElement("li");
+                comment.setAttribute("class", "comment top-left-pinned");
+                comment.innerHTML = noteData.comments[i];
+                const rotationMax = 5;
+                comment.style.rotate = Math.random() * rotationMax * 2 - rotationMax + "deg";
+                comment.style.zIndex = noteData.comments.length - i;
+                commentList.appendChild(comment);
+            }
+            note.appendChild(commentList);
+        }
+
+        note.style.left = noteData.position.x + "px";
+        note.style.top = noteData.position.y + "px";
+
+        document.getElementById("notespace").appendChild(note);
+
+        note.addEventListener("mousedown", function(event) {
+            mousePosition = {x: event.x, y: event.y};
+            selectedNoteIndex = noteIndex;
+            document.addEventListener("mousemove", moveNote, false);
+        }, false)
+    }
+
+    function noteClick(noteIndex) {
+        switch (mode) {
+            case "edit":
+                loadEditor(noteIndex);
+                break;
+            case "pin":
+                if (firstConnectionId == undefined) {
+                    firstConnectionId = noteIndex;
+                } else {
+                    if (noteIndex == firstConnectionId) {firstConnectionId = undefined;}
+                    else {connectNotes(firstConnectionId, noteIndex);}
+                }
+                break;
+        }
+    }
+
+    function moveNote(event) {
+        noteDataStore[selectedNoteIndex].position.x += event.x - mousePosition.x;
+        noteDataStore[selectedNoteIndex].position.y += event.y - mousePosition.y;
+        mousePosition.x = event.x;
+        mousePosition.y = event.y;
+
+        const noteData = noteDataStore[selectedNoteIndex];
+        const note = document.getElementById("note-" + selectedNoteIndex)
+
+        note.style.left = noteData.position.x + "px";
+        note.style.top = noteData.position.y + "px";
+        redrawConnections();
+    }
+
+    function redrawConnections() {
+        const strings = document.getElementById("strings");
+        strings.innerHTML = "";
+
+        for (noteIndex in noteDataStore) {
+            const noteData = noteDataStore[noteIndex];
+            if (noteData.connections == undefined) {continue;}
+            for (i in noteData.connections) {
+                const connectedNoteIndex = noteData.connections[i];
+                const connectedNoteData = noteDataStore[connectedNoteIndex];
+
+                const noteHasRightPin = document.getElementById("note-"+ noteIndex).children[0].classList.contains("top-right-pinned");
+                const connectedNoteHasRightPin = document.getElementById("note-"+ connectedNoteIndex).children[0].classList.contains("top-right-pinned");
+
+                const noteUsingLeftPin = noteData.position.x >= connectedNoteData.position.x || !noteHasRightPin;
+                const connectedNoteUsingLeftPin = noteData.position.x <= connectedNoteData.position.x || !connectedNoteHasRightPin;
+                
+                const notePin = {x: noteData.position.x + (noteUsingLeftPin ? 7.5 : 92.5), y: noteData.position.y + 10};
+                const connectedNotePin = {x: connectedNoteData.position.x + (connectedNoteUsingLeftPin ? 7.5 : 92.5), y: connectedNoteData.position.y + 10};
+                
+                const outline = document.createElement("line");
+                outline.setAttribute("x1", notePin.x);
+                outline.setAttribute("y1", notePin.y);
+                outline.setAttribute("x2", connectedNotePin.x);
+                outline.setAttribute("y2", connectedNotePin.y);
+                outline.setAttribute("stroke-width", 5);
+                outline.setAttribute("stroke", "#000");
+                strings.appendChild(outline);
+
+                const fill = document.createElement("line");
+                fill.setAttribute("x1", notePin.x);
+                fill.setAttribute("y1", notePin.y);
+                fill.setAttribute("x2", connectedNotePin.x);
+                fill.setAttribute("y2", connectedNotePin.y);
+                fill.setAttribute("stroke-width", 4);
+                fill.setAttribute("stroke", "#500");
+                strings.appendChild(fill);
+
+                const string = document.createElement("line");
+                string.setAttribute("x1", notePin.x);
+                string.setAttribute("y1", notePin.y);
+                string.setAttribute("x2", connectedNotePin.x);
+                string.setAttribute("y2", connectedNotePin.y);
+                string.setAttribute("stroke-width", 4);
+                string.setAttribute("stroke", "#D00");
+                string.setAttribute("stroke-dasharray", "4 1");
+                strings.appendChild(string);
+            }
+        }
+        strings.innerHTML += "";
+    }
+
+    function loadEditor(noteIndex) {
+        selectedNoteIndex = noteIndex;
+        document.getElementById("create-note").style.left = "62vw";
+        document.getElementById("editor").style.left = "65vw";
+        const noteData = noteDataStore[noteIndex];
+
+        document.getElementById("editor-title").value = noteData.title != undefined ? noteData.title : "";
+        document.getElementById("editor-image").value = noteData.image != undefined ? noteData.image : "";
+        document.getElementById("editor-caption").value = noteData.caption != undefined ? noteData.caption : "";
+
+        const editorComments = document.getElementById("editor-comments");
+        editorComments.innerHTML = "";
+        let lastCommentIndex = 0;
+        if (noteData.comments != undefined) {
+            for (i in noteData.comments) {
+                lastCommentIndex += 1;
+                const comment = noteData.comments[i];
+
+                const newComment = document.createElement("input");
+                newComment.id = "comment-" + i;
+                newComment.type = "text";
+                newComment.setAttribute("placeholder", "Comment");
+                newComment.setAttribute("onInput", "javascript: editComment(this);");
+                newComment.value = comment;
+                editorComments.appendChild(newComment);
+
+                const newDeleteButton = document.createElement("button");
+                newDeleteButton.setAttribute("class", "delete-comment-button");
+                newDeleteButton.type = "button";
+                newDeleteButton.setAttribute("placeholder", "Comment");
+                newDeleteButton.setAttribute("onClick", "javascript: deleteComment(" + i + ");");
+                newDeleteButton.innerText = "X";
+                editorComments.appendChild(newDeleteButton);
+            }
+        }
+
+        const newComment = document.createElement("input");
+        newComment.id = "comment-" + lastCommentIndex + " last-comment";
+        newComment.type = "text";
+        newComment.setAttribute("placeholder", "Comment");
+        newComment.setAttribute("onInput", "javascript: editComment(this);");
+        editorComments.appendChild(newComment);
+
+        const newDeleteButton = document.createElement("button");
+        newDeleteButton.setAttribute("class", "delete-comment-button");
+        newDeleteButton.type = "button";
+        newDeleteButton.setAttribute("placeholder", "Comment");
+        newDeleteButton.setAttribute("onClick", "javascript: deleteComment(" + lastCommentIndex + ");");
+        newDeleteButton.innerText = "X";
+        editorComments.appendChild(newDeleteButton);
+    }
+
+    function createNote() {
+        let i = 0;
+        while (noteDataStore[i] != undefined) {i++;}
+        noteDataStore[i] = {position: {x: 0, y: 0}};
+        loadEditor(i);
+    }
+
+    function hideEditor() {
+        document.getElementById("create-note").style.left = "97vw";
+        document.getElementById("editor").style.left = "100vw";
+    }
+
+    function editTitle(title) {
+        if (title == "") {
+            delete noteDataStore[selectedNoteIndex].title;
+        } else {
+            noteDataStore[selectedNoteIndex].title = title;
+        }
+
+        if (emptyNote()) {
+            deleteNote();
+            hideEditor();
+        } else {
+            buildNote(selectedNoteIndex);
+        }
+    }
+
+    function editImage(image) {
+        if (image == "") {
+            delete noteDataStore[selectedNoteIndex].image;
+        } else {
+            noteDataStore[selectedNoteIndex].image = image;
+        }
+
+        if (emptyNote()) {
+            deleteNote();
+            hideEditor();
+        } else {
+            buildNote(selectedNoteIndex);
+        }
+    }
+
+    function editCaption(caption) {
+        if (caption == "") {
+            delete noteDataStore[selectedNoteIndex].caption;
+        } else {
+            noteDataStore[selectedNoteIndex].caption = caption;
+        }
+
+        if (emptyNote()) {
+            deleteNote();
+            hideEditor();
+        } else {
+            buildNote(selectedNoteIndex);
+        }
+    }
+
+    function editComment(comment) {
+        const commentId = parseInt(comment.id.split(" ")[0].split("comment-")[1]);
+        const isLastComment = comment.id.split(" ")[1] == "last-comment";
+
+        if (isLastComment) {
+            comment.id = "comment-" + commentId;
+
+            const editorComments = document.getElementById("editor-comments");
+
+            const newComment = document.createElement("input");
+            newComment.id = "comment-" + (commentId + 1) + " last-comment";
+            newComment.type = "text";
+            newComment.setAttribute("placeholder", "Comment");
+            newComment.setAttribute("onInput", "javascript: editComment(this);");
+            editorComments.appendChild(newComment);
+
+            const newDeleteButton = document.createElement("button");
+            newDeleteButton.setAttribute("class", "delete-comment-button");
+            newDeleteButton.type = "button";
+            newDeleteButton.setAttribute("placeholder", "Comment");
+            newDeleteButton.setAttribute("onClick", "javascript: deleteComment(" + (commentId + 1) + ");");
+            newDeleteButton.innerText = "X";
+            editorComments.appendChild(newDeleteButton);
+        }
+
+        const buttons = document.getElementsByClassName("delete-comment-button");
+        for (let i=0; i<buttons.length; i++) {
+            buttons[i].disabled = buttons.length == 1;
+        }
+
+        if (noteDataStore[selectedNoteIndex].comments == undefined) {
+            noteDataStore[selectedNoteIndex].comments = [];
+        }
+        noteDataStore[selectedNoteIndex].comments[commentId] = comment.value;
+        buildNote(selectedNoteIndex);
+    }
+
+    function deleteComment(commentId) {
+        const noteData = noteDataStore[selectedNoteIndex];
+        const oldComments = noteData.comments;
+        noteData.comments = [];
+        for (i in oldComments) {
+            if (i != commentId) {
+                noteData.comments.push(oldComments[i]);
+            }
+        }
+
+        if (noteData.comments.length == 0) {
+            delete noteData.comments;
+        }
+
+        noteDataStore[selectedNoteIndex] = noteData;
+
+        if (emptyNote()) {
+            deleteNote();
+            hideEditor();
+        } else {
+            loadEditor(selectedNoteIndex);
+            buildNote(selectedNoteIndex);
+        }
+    }
+
+    function emptyNote() {
+        const noteData = noteDataStore[selectedNoteIndex];
+        return noteData.title == undefined && noteData.image == undefined && noteData.caption == undefined && noteData.comments == undefined;
+    }
+
+    function deleteNote() {
+        console.log(selectedNoteIndex);
+        delete noteDataStore[selectedNoteIndex];
+        for (i in noteDataStore) {
+            if (noteDataStore[i].connections == undefined) {continue;}
+            const oldConnections = noteDataStore[i].connections;
+            noteDataStore[i].connections = [];
+            console.log(oldConnections);
+            for (j in oldConnections) {
+                if (oldConnections[j] != selectedNoteIndex) {
+                    noteDataStore[i].connections.push(oldConnections[j]);
+                }
+            }
+        }
+        selectedNoteIndex = -1;
+        drawAllNotes();
+    }
+
+    function connectNotes(firstNoteIndex, secondNoteIndex) {
+        const firstNoteConnections = noteDataStore[firstNoteIndex].connections != undefined ? noteDataStore[firstNoteIndex].connections : [];
+        noteDataStore[firstNoteIndex].connections = [];
+
+        const secondNoteConnections = noteDataStore[secondNoteIndex].connections != undefined ? noteDataStore[secondNoteIndex].connections : [];
+        noteDataStore[secondNoteIndex].connections = [];
+
+        let connectionExists = false;
+        for (i in firstNoteConnections) {
+            if (firstNoteConnections[i] == secondNoteIndex) {connectionExists = true;} 
+            else {noteDataStore[firstNoteIndex].connections.push(firstNoteConnections[i]);}
+        }
+        for (i in secondNoteConnections) {
+            if (secondNoteConnections[i] == firstNoteIndex) {connectionExists = true;}
+            else {noteDataStore[secondNoteIndex].connections.push(secondNoteConnections[i]);}
+        }
+
+        if (connectionExists) {
+            console.log(firstNoteIndex, secondNoteIndex, "Removed");
+            if (noteDataStore[firstNoteIndex].connections.length == 0) {delete noteDataStore[firstNoteIndex].connections;}
+            if (noteDataStore[secondNoteIndex].connections.length == 0) {delete noteDataStore[secondNoteIndex].connections;}
+        } else {
+            console.log(firstNoteIndex, secondNoteIndex, "Added");
+            noteDataStore[firstNoteIndex].connections.push(secondNoteIndex);
+            noteDataStore[secondNoteIndex].connections.push(firstNoteIndex);
+        }
+
+        firstConnectionId = undefined;
+        redrawConnections();
+    }
+
+    function saveToFile() {
+        const a = document.getElementById("file-download-helper");
+        a.href = URL.createObjectURL(new Blob([JSON.stringify(noteDataStore)],{type: 'text/plain'}));
+        a.download = "file.board";
+        a.click();
+    }
+
+    function loadFromFile() {
+        console.log("Loaded");
+        let reader = new FileReader();
+        reader.onload = function() {
+            noteDataStore = JSON.parse(reader.result);
+            console.log(noteDataStore);
+            drawAllNotes();
+        }
+        reader.readAsText(document.getElementById('load-from-file').files[0]);
+    }
+</script>
+</html>
