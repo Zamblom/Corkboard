@@ -3,6 +3,8 @@
 <head>
     <meta charset="utf-8">
     <title>Corkboard</title>
+    <link rel="stylesheet" href="https://www.cssscript.com/demo/minimal-notification-popup-pure-javascript/notifications.css">
+    <script src="https://www.cssscript.com/demo/minimal-notification-popup-pure-javascript/notifications.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -253,6 +255,8 @@
         document.addEventListener("mouseup", function() {
             document.removeEventListener("mousemove", moveNote, false);
         }, false);
+
+        checkForUpdate();
     }
 
     var noteDataStore = {};
@@ -670,6 +674,74 @@
             drawAllNotes();
         }
         reader.readAsText(document.getElementById('load-from-file').files[0]);
+    }
+</script>
+<script id="script-notification-handler">
+    function displayNotification (successful, title, message) {
+        let theme = successful ? "success" : "error";
+        window.createNotification({
+            positionClass: 'nfc-bottom-right',
+            displayCloseButton: true,
+            theme: theme
+        })({ 
+            title: title,
+            message: message
+        });
+    }
+</script>
+<script id="script-version-handler">
+    const version = "1.1";
+    let latestVersion;
+    let latestDocument;
+
+    function versionStringToVersion(versionString) {
+        let versionArray = versionString.split(".");
+        for (let i=0; i<versionArray.length; i++) {
+            versionArray[i] = parseInt(versionArray[i]);
+        }
+        return versionArray;
+    }
+
+    function greaterVersion(version1string, version2string) {
+        const version1 = versionStringToVersion(version1string);
+        const version2 = versionStringToVersion(version2string);
+        for (let i=0; i<Math.min(version1.length, version2.length); i++) {
+            if (version1[i] > version2[i]) {return version1string;}
+            if (version2[i] > version1[i]) {return version2string;}
+        }
+        if (version2.length > version1.length) {return version2string;}
+        return version1string;
+    }
+
+    async function getLatestVersion() {
+        latestDocument = await(await fetch("https://raw.githubusercontent.com/Zamblom/Corkboard/main/corkboard.html?ms=" + Date.now())).text();
+        latestVersion = new RegExp('(?<=const version \\= ").*(?=";)').exec(latestDocument)[0];
+    }
+
+    async function checkForUpdate() {
+        try {
+            await getLatestVersion();
+            const newVersion = latestVersion;
+            if (greaterVersion(version, newVersion) == version) {
+                displayNotification(true, "Success", "Latest Version");
+            } else {
+                document.getElementById("update-box").hidden = false;
+            }
+        } catch (error) {
+            displayNotification(false, "Error", error);
+        }
+    }
+
+    async function downloadUpdate() {
+        try {
+            const a = document.getElementById("file-download-helper");
+            a.href = URL.createObjectURL(new Blob([latestDocument],{type: 'text/html'}));
+            a.download = "corkboard_v" + latestVersion + ".html";
+            a.click();
+            displayNotification(true, "Success", "Downloaded new version");
+        } catch (error) {
+            displayNotification(false, "Error", error);
+        }
     }
 </script>
 </html>
